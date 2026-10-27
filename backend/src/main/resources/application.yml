@@ -1,0 +1,169 @@
+spring:
+  application:
+    name: auctix-backend
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/auctix}
+    username: ${SPRING_DATASOURCE_USERNAME:auctix}
+    password: ${SPRING_DATASOURCE_PASSWORD:auctix}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: auctix-pool
+      maximum-pool-size: ${DB_POOL_SIZE:24}
+      minimum-idle: 4
+      connection-timeout: 20000
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+        format_sql: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    default-property-inclusion: non_null
+
+  servlet:
+    multipart:
+      # Spring rejects an oversized part before it reaches a controller. Kept a little above
+      # auctix.uploads.max-file-size-bytes so the application's own message is what the seller
+      # sees, rather than a bare 500 from the container.
+      max-file-size: 6MB
+      max-request-size: 40MB
+
+  threads:
+    virtual:
+      enabled: false
+
+server:
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: framework
+  error:
+    # The message is needed to diagnose anything that escapes the global handler.
+    # Stack traces stay off so internals are never exposed to a client.
+    include-message: always
+    include-stacktrace: never
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    root: INFO
+    com.auctix: ${LOG_LEVEL_AUCTIX:INFO}
+    org.hibernate.SQL: WARN
+
+auctix:
+  jwt:
+    # Supplied through the environment. The application refuses to start without it.
+    secret: ${JWT_SECRET:}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:720}
+    issuer: auctix
+    generate-if-missing: false
+
+  cors:
+    # Patterns, not literal origins: "[*]" is Spring's port wildcard, so whichever HTTP_PORT
+    # you publish the app on is accepted. Without this, a POST from an unlisted origin is
+    # rejected by the CORS filter with a bare 403 before it reaches any controller.
+    allowed-origins: "${CORS_ALLOWED_ORIGINS:http://localhost,http://localhost:[*],http://127.0.0.1,http://127.0.0.1:[*]}"
+
+  redis:
+    enabled: ${REDIS_ENABLED:true}
+    channel: ${REDIS_EVENT_CHANNEL:auctix:events}
+    cache-ttl-seconds: 30
+
+  auction:
+    ending-window-seconds: ${AUCTION_ENDING_WINDOW_SECONDS:60}
+    archive-after-days: ${AUCTION_ARCHIVE_AFTER_DAYS:30}
+    scheduler-interval-ms: ${AUCTION_SCHEDULER_INTERVAL_MS:1000}
+    archive-cron: "0 15 3 * * *"
+    anti-snipe:
+      enabled: ${ANTI_SNIPE_ENABLED:true}
+      window-seconds: ${ANTI_SNIPE_WINDOW_SECONDS:30}
+      extension-seconds: ${ANTI_SNIPE_EXTENSION_SECONDS:30}
+      max-extensions: ${ANTI_SNIPE_MAX_EXTENSIONS:20}
+
+  bidding:
+    rate-limit-enabled: ${BID_RATE_LIMIT_ENABLED:true}
+    rate-limit-max-bids: ${BID_RATE_LIMIT_MAX:10}
+    rate-limit-window-seconds: ${BID_RATE_LIMIT_WINDOW_SECONDS:10}
+    max-retries: 3
+    max-proxy-iterations: 25
+
+  assistant:
+    enabled: ${AUCTIX_ASSISTANT_ENABLED:true}
+    # Set these to point at a real provider. The key stays on the server; it is never sent to
+    # the browser. With no key the assistant answers from its rule engine and labels replies
+    # as rule-based rather than claiming to be a model.
+    provider: ${AUCTIX_ASSISTANT_PROVIDER:}
+    api-key: ${AUCTIX_ASSISTANT_API_KEY:}
+
+  uploads:
+    # The uploads-data Docker volume, mounted at /app/uploads by docker-compose.yml.
+    directory: ${AUCTIX_UPLOAD_DIR:/app/uploads}
+    max-file-size-bytes: ${AUCTIX_UPLOAD_MAX_BYTES:5242880}
+    max-per-listing: ${AUCTIX_UPLOAD_MAX_PER_LISTING:6}
+
+  seed:
+    enabled: ${AUCTIX_SEED_ENABLED:true}
+    default-password: ${AUCTIX_SEED_PASSWORD:Password123!}
+
+---
+# Local development: run the backend with `-Dspring-boot.run.profiles=dev`
+spring:
+  config:
+    activate:
+      on-profile: dev
+auctix:
+  jwt:
+    generate-if-missing: true
+  redis:
+    enabled: ${REDIS_ENABLED:false}
+logging:
+  level:
+    com.auctix: DEBUG
+
+---
+# Profile used inside Docker Compose; values come from the compose environment block.
+spring:
+  config:
+    activate:
+      on-profile: docker
+  jpa:
+    hibernate:
+      ddl-auto: update
+auctix:
+  redis:
+    enabled: true
