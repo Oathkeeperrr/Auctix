@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    # H2 in PostgreSQL compatibility mode keeps the suite runnable without Docker.
+    # LOCK_TIMEOUT makes competing transactions wait for the row lock instead of failing
+    # immediately, which is how PostgreSQL behaves for SELECT ... FOR UPDATE.
+    url: jdbc:h2:mem:auctix;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=15000
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 32
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  main:
+    allow-bean-definition-overriding: true
+
+logging:
+  level:
+    com.auctix: INFO
+    org.springframework.web.socket: WARN
+
+auctix:
+  jwt:
+    secret: integration-test-secret-key-that-is-long-enough-123456
+    expiration-minutes: 60
+    generate-if-missing: true
+  redis:
+    # Events are dispatched in-process; no Redis server is needed for the suite.
+    enabled: false
+  auction:
+    ending-window-seconds: 60
+    # The lifecycle scheduler is effectively disabled; tests drive transitions explicitly.
+    scheduler-interval-ms: 3600000
+    archive-cron: "0 0 3 1 1 *"
+    anti-snipe:
+      enabled: true
+      window-seconds: 30
+      extension-seconds: 30
+      max-extensions: 5
+  bidding:
+    rate-limit-enabled: false
+    max-retries: 5
+  seed:
+    enabled: false
