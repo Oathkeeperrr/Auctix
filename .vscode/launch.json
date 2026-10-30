@@ -1,0 +1,43 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug AuctiX backend",
+      "request": "launch",
+      "mainClass": "com.auctix.AuctixApplication",
+      "projectName": "auctix-backend",
+      "args": "--spring.profiles.active=dev",
+      "env": {
+        "JWT_SECRET": "local-development-secret-at-least-32-characters-long",
+        "SPRING_DATASOURCE_URL": "jdbc:postgresql://localhost:5432/auctix",
+        "SPRING_DATASOURCE_USERNAME": "auctix",
+        "SPRING_DATASOURCE_PASSWORD": "auctix",
+        "REDIS_ENABLED": "true",
+        "REDIS_HOST": "localhost"
+      },
+      "preLaunchTask": "AuctiX: start infrastructure only (postgres + redis)"
+    },
+    {
+      "type": "chrome",
+      "name": "Open AuctiX in Chrome (dev server)",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend/src"
+    },
+    {
+      "type": "chrome",
+      "name": "Open AuctiX in Chrome (Docker)",
+      "request": "launch",
+      "url": "http://localhost",
+      "webRoot": "${workspaceFolder}/frontend/src"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "AuctiX: debug backend + open browser",
+      "configurations": ["Debug AuctiX backend", "Open AuctiX in Chrome (dev server)"],
+      "stopAll": true
+    }
+  ]
+}

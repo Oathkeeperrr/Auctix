@@ -1,0 +1,107 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "AuctiX: start everything (Docker)",
+      "detail": "Builds and runs postgres, redis, backend, frontend and nginx. Open http://localhost",
+      "type": "shell",
+      "command": "docker compose up --build",
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "auctix" },
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "AuctiX: stop everything",
+      "type": "shell",
+      "command": "docker compose down",
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "auctix" }
+    },
+    {
+      "label": "AuctiX: stop and wipe the database",
+      "type": "shell",
+      "command": "docker compose down -v",
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "auctix" }
+    },
+    {
+      "label": "AuctiX: start infrastructure only (postgres + redis)",
+      "detail": "Use this when you want to run the backend and frontend from VS Code with hot reload.",
+      "type": "shell",
+      "command": "docker compose up -d postgres redis",
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "auctix" }
+    },
+    {
+      "label": "AuctiX: backend dev server",
+      "detail": "Spring Boot with the dev profile. Needs postgres running.",
+      "type": "shell",
+      "command": "mvn spring-boot:run -Dspring-boot.run.profiles=dev",
+      "options": {
+        "cwd": "${workspaceFolder}/backend",
+        "env": {
+          "JWT_SECRET": "local-development-secret-at-least-32-characters-long",
+          "SPRING_DATASOURCE_URL": "jdbc:postgresql://localhost:5432/auctix",
+          "SPRING_DATASOURCE_USERNAME": "auctix",
+          "SPRING_DATASOURCE_PASSWORD": "auctix",
+          "REDIS_ENABLED": "true",
+          "REDIS_HOST": "localhost"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "auctix" }
+    },
+    {
+      "label": "AuctiX: frontend dev server",
+      "detail": "Vite on http://localhost:5173 with hot reload, proxying /api and /ws to :8080",
+      "type": "shell",
+      "command": "npm install && npm run dev",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "auctix" }
+    },
+    {
+      "label": "AuctiX: dev mode (infra + backend + frontend)",
+      "detail": "One click: starts postgres/redis, then the backend and the Vite dev server.",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "AuctiX: start infrastructure only (postgres + redis)",
+        "AuctiX: backend dev server",
+        "AuctiX: frontend dev server"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "AuctiX: run all backend tests",
+      "type": "shell",
+      "command": "mvn test",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "AuctiX: run the concurrency test",
+      "detail": "20 simultaneous bidders on one auction.",
+      "type": "shell",
+      "command": "mvn test -Dtest=BiddingConcurrencyTest",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "AuctiX: follow backend logs",
+      "type": "shell",
+      "command": "docker compose logs -f backend",
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "auctix" }
+    },
+    {
+      "label": "AuctiX: frontend typecheck",
+      "type": "shell",
+      "command": "npm run typecheck",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "problemMatcher": ["$tsc"]
+    }
+  ]
+}
