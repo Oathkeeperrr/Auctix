@@ -1,0 +1,17 @@
+package com.auctix.domain;
+
+public enum NotificationType {
+    BID_ACCEPTED,
+    OUTBID,
+    AUCTION_STARTED,
+    AUCTION_EXTENDED,
+    AUCTION_ENDING,
+    AUCTION_CLOSED,
+    AUCTION_WON,
+    AUCTION_LOST,
+    AUCTION_SOLD,
+    LISTING_APPROVED,
+    LISTING_REJECTED,
+    ACCOUNT_SUSPENDED,
+    SYSTEM
+}
