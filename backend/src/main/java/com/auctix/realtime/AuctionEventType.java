@@ -1,0 +1,17 @@
+package com.auctix.realtime;
+
+public enum AuctionEventType {
+    BID_PLACED,
+    BID_REJECTED,
+    OUTBID,
+    AUCTION_STARTED,
+    AUCTION_EXTENDED,
+    AUCTION_ENDING,
+    AUCTION_CLOSED,
+    AUCTION_SETTLED,
+    AUCTION_WON,
+    AUCTION_APPROVED,
+    AUCTION_REJECTED,
+    NOTIFICATION,
+    WATCHERS
+}
