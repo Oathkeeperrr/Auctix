@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --glass-border: rgba(255, 255, 255, 0.09);
+    --glass-fill: rgba(14, 19, 36, 0.55);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink-950 text-slate-200 font-sans antialiased;
+    background-image:
+      radial-gradient(90rem 50rem at 50% -20%, rgba(43, 79, 214, 0.22), transparent 60%),
+      radial-gradient(60rem 40rem at 90% 10%, rgba(139, 92, 246, 0.14), transparent 65%),
+      radial-gradient(50rem 40rem at 5% 30%, rgba(216, 179, 95, 0.07), transparent 60%);
+    background-attachment: fixed;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    @apply bg-accent/40 text-white;
+  }
+
+  /* Thin, dark scrollbars that match the gallery feel. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(76, 125, 255, 0.45);
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent/70 ring-offset-2 ring-offset-ink-950;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-tight text-white;
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--glass-fill);
+    border: 1px solid var(--glass-border);
+    @apply rounded-2xl backdrop-blur-xl shadow-glass;
+  }
+
+  .glass-soft {
+    background: rgba(16, 22, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    @apply rounded-xl backdrop-blur-md;
+  }
+
+  .hairline {
+    @apply border border-white/[0.07];
+  }
+
+  .label-eyebrow {
+    @apply text-[11px] font-medium uppercase tracking-[0.28em] text-slate-400;
+  }
+
+  .stat-value {
+    @apply font-display text-2xl font-semibold text-white tabular-nums;
+  }
+
+  /* Animated gradient hairline used on primary cards. */
+  .edge-glow {
+    position: relative;
+  }
+
+  .edge-glow::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(120deg, rgba(76, 125, 255, 0.55), rgba(139, 92, 246, 0.35), rgba(216, 179, 95, 0.4), rgba(76, 125, 255, 0.55));
+    background-size: 300% 300%;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+
+  .edge-glow:hover::after,
+  .edge-glow.is-active::after {
+    opacity: 1;
+    animation: border-flow 6s ease infinite;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden rounded-md bg-white/[0.045];
+  }
+
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+  }
+
+  .nav-index {
+    @apply font-mono text-[10px] text-accent/70;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Respect the operating-system preference: stop all motion, keep the layout. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
